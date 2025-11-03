@@ -1,0 +1,538 @@
+<div class="bg-gradient min-h-screen">
+    <!-- Exit Button -->
+    <button class="exit-btn" onclick="navigateTo('dashboard')">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div id="header-container"></div>
+    
+    <main class="container py-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">Appointments</h1>
+                <p class="text-muted">Manage your medical appointments and check-ups</p>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="card">
+                    <div class="card-content text-center">
+                        <i class="fas fa-plus-circle text-primary text-2xl mb-3"></i>
+                        <h3 class="font-semibold mb-2">Add Appointment</h3>
+                        <button class="btn btn-primary btn-sm" onclick="showAddAppointmentModal()">
+                            Schedule New
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content text-center">
+                        <i class="fas fa-calendar-day text-secondary text-2xl mb-3"></i>
+                        <h3 class="font-semibold mb-2">Today's Appointments</h3>
+                        <div class="text-2xl font-bold text-secondary" id="todayCount">2</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content text-center">
+                        <i class="fas fa-clock text-primary text-2xl mb-3"></i>
+                        <h3 class="font-semibold mb-2">Upcoming</h3>
+                        <div class="text-2xl font-bold text-primary" id="upcomingCount">5</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Appointments -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h2 class="text-xl font-semibold">Upcoming Appointments</h2>
+                </div>
+                <div class="card-content">
+                    <div id="upcomingAppointments">
+                        <!-- Upcoming appointments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold">Calendar View</h2>
+                        <div class="flex gap-2">
+                            <button class="btn btn-outline btn-sm" id="prevMonth">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="currentMonth" class="px-4 py-1 font-semibold"></span>
+                            <button class="btn btn-outline btn-sm" id="nextMonth">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="calendar-grid" id="calendar">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Appointments -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold">All Appointments</h2>
+                        <div class="flex gap-2">
+                            <select id="statusFilter" class="form-input form-select" style="width: 150px;">
+                                <option value="">All Status</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="rescheduled">Rescheduled</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="showAddAppointmentModal()">
+                                <i class="fas fa-plus mr-1"></i>
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="appointment-list" id="appointmentList">
+                        <!-- All appointments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="bottom-nav-container"></div>
+    <div id="footer-container"></div>
+</div>
+
+<!-- Add/Edit Appointment Modal -->
+<div id="appointmentModal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeAppointmentModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="appointmentModalTitle">Add Appointment</h3>
+            <button onclick="closeAppointmentModal()" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="appointmentForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="appointmentTitle">Appointment Title</label>
+                    <input type="text" id="appointmentTitle" class="form-input" placeholder="e.g., Follow-up consultation" required>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="appointmentDate">Date</label>
+                        <input type="date" id="appointmentDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="appointmentTime">Time</label>
+                        <input type="time" id="appointmentTime" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="doctorName">Doctor/Healthcare Provider</label>
+                    <input type="text" id="doctorName" class="form-input" placeholder="Dr. Smith" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="appointmentType">Appointment Type</label>
+                    <select id="appointmentType" class="form-input form-select" required>
+                        <option value="">Select type</option>
+                        <option value="followup">Follow-up</option>
+                        <option value="checkup">Check-up</option>
+                        <option value="therapy">Physical Therapy</option>
+                        <option value="surgery">Surgery</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="testing">Testing/Imaging</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="appointmentLocation">Location</label>
+                    <input type="text" id="appointmentLocation" class="form-input" placeholder="General Surgery Clinic">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="appointmentNotes">Notes</label>
+                    <textarea id="appointmentNotes" class="form-input form-textarea" placeholder="Any special instructions or notes..." rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="reminderEnabled" checked>
+                        <label for="reminderEnabled">Enable reminder notifications</label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="reminderOptions">
+                    <label class="form-label">Reminder Time</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="reminder1Hour" checked>
+                            <label for="reminder1Hour">1 hour before</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="reminder1Day">
+                            <label for="reminder1Day">1 day before</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeAppointmentModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Appointment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Appointment Details Modal -->
+<div id="appointmentDetailsModal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeAppointmentDetailsModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Appointment Details</h3>
+            <button onclick="closeAppointmentDetailsModal()" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="appointmentDetailsContent">
+            <!-- Appointment details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeAppointmentDetailsModal()">Close</button>
+            <button class="btn btn-secondary" id="editAppointmentBtn">
+                <i class="fas fa-edit mr-2"></i>
+                Edit
+            </button>
+            <button class="btn btn-destructive" id="cancelAppointmentBtn">
+                <i class="fas fa-times mr-2"></i>
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.max-w-4xl {
+    max-width: 56rem;
+}
+
+.appointment-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--card);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.appointment-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.appointment-card.today {
+    border-left: 4px solid var(--primary);
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.appointment-card.upcoming {
+    border-left: 4px solid var(--secondary);
+    background: rgba(33, 150, 243, 0.05);
+}
+
+.appointment-card.past {
+    opacity: 0.7;
+}
+
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.appointment-info {
+    flex: 1;
+}
+
+.appointment-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.appointment-doctor {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.appointment-datetime {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.appointment-date,
+.appointment-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+}
+
+.appointment-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.appointment-status.scheduled {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--primary);
+}
+
+.appointment-status.completed {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.appointment-status.cancelled {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--destructive);
+}
+
+.appointment-status.rescheduled {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.appointment-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Calendar Styles */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.calendar-header {
+    background: var(--muted);
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.calendar-day {
+    background: var(--card);
+    padding: 0.75rem 0.5rem;
+    min-height: 80px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.calendar-day:hover {
+    background: var(--muted);
+}
+
+.calendar-day.other-month {
+    background: #fafafa;
+    color: var(--muted-foreground);
+}
+
+.calendar-day.today {
+    background: rgba(76, 175, 80, 0.1);
+    border: 2px solid var(--primary);
+}
+
+.calendar-day.has-appointment {
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.calendar-day-number {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-appointments {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.calendar-appointment {
+    background: var(--primary);
+    color: white;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-appointment.therapy {
+    background: var(--secondary);
+}
+
+.calendar-appointment.checkup {
+    background: #f59e0b;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background: var(--card);
+    border-radius: var(--radius);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    z-index: 1001;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--muted-foreground);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.modal-close:hover {
+    background: var(--muted);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.appointment-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.appointment-detail-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--muted);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-foreground);
+}
+
+.appointment-detail-content h4 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.appointment-detail-content p {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .grid.grid-cols-1.md\\:grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .calendar-grid {
+        font-size: 0.75rem;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .appointment-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .appointment-datetime {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>

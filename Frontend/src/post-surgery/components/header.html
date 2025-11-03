@@ -1,0 +1,49 @@
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <h1 class="header-title" id="headerTitle">Recovery Tracker</h1>
+            <div class="header-actions">
+                <button class="btn btn-ghost" id="notificationsBtn">
+                    <i class="fas fa-bell mr-2"></i>
+                    <span class="hidden md:inline">Notifications</span>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;"></span>
+                </button>
+                <button class="btn btn-ghost" id="profileBtn">
+                    <i class="fas fa-user mr-2"></i>
+                    <span class="hidden md:inline">Profile</span>
+                </button>
+                <button class="btn btn-outline" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span class="hidden md:inline">Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<style>
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--destructive);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-actions button {
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .header-actions .hidden {
+        display: none !important;
+    }
+}
+</style>

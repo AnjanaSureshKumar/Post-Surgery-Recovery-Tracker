@@ -1,0 +1,391 @@
+<div class="bg-gradient min-h-screen">
+    <!-- Exit Button -->
+    <button class="exit-btn" onclick="navigateTo('dashboard')">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div id="header-container"></div>
+    
+    <main class="container py-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">Medical Reports</h1>
+                <p class="text-muted">Upload and manage your medical documents, X-rays, and reports</p>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h2 class="text-xl font-semibold">Upload New Report</h2>
+                </div>
+                <div class="card-content">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-primary mb-4"></i>
+                            <h3 class="font-semibold mb-2">Drag & drop files here</h3>
+                            <p class="text-muted mb-4">or click to browse files</p>
+                            <button class="btn btn-primary" id="browseBtn">
+                                <i class="fas fa-folder-open mr-2"></i>
+                                Browse Files
+                            </button>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.gif" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <!-- File Upload Form -->
+                    <form id="uploadForm" class="mt-6" style="display: none;">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label" for="reportTitle">Report Title</label>
+                                <input type="text" id="reportTitle" class="form-input" placeholder="e.g., Post-op X-ray" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reportType">Report Type</label>
+                                <select id="reportType" class="form-input form-select" required>
+                                    <option value="">Select type</option>
+                                    <option value="xray">X-ray</option>
+                                    <option value="bloodwork">Blood Work</option>
+                                    <option value="mri">MRI</option>
+                                    <option value="ct">CT Scan</option>
+                                    <option value="ultrasound">Ultrasound</option>
+                                    <option value="pathology">Pathology Report</option>
+                                    <option value="discharge">Discharge Summary</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reportDate">Report Date</label>
+                                <input type="date" id="reportDate" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="doctorName">Doctor/Facility</label>
+                                <input type="text" id="doctorName" class="form-input" placeholder="Dr. Smith / General Hospital">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reportNotes">Notes</label>
+                            <textarea id="reportNotes" class="form-input form-textarea" placeholder="Additional notes about this report..." rows="3"></textarea>
+                        </div>
+                        
+                        <!-- Selected Files Preview -->
+                        <div id="selectedFiles" class="mb-4"></div>
+                        
+                        <div class="flex gap-4">
+                            <button type="button" class="btn btn-outline" onclick="cancelUpload()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload mr-2"></i>
+                                Upload Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Filter and Search -->
+            <div class="card mb-6">
+                <div class="card-content">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="search" id="searchReports" class="form-input" placeholder="Search reports...">
+                        </div>
+                        <div>
+                            <select id="filterType" class="form-input form-select">
+                                <option value="">All Types</option>
+                                <option value="xray">X-rays</option>
+                                <option value="bloodwork">Blood Work</option>
+                                <option value="mri">MRI</option>
+                                <option value="ct">CT Scans</option>
+                                <option value="ultrasound">Ultrasounds</option>
+                                <option value="pathology">Pathology</option>
+                                <option value="discharge">Discharge</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="sortBy" class="form-input form-select">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="name-asc">Name A-Z</option>
+                                <option value="name-desc">Name Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports List -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="reportsList">
+                <!-- Sample reports will be loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-12" style="display: none;">
+                <i class="fas fa-file-medical text-6xl text-muted mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">No Reports Found</h3>
+                <p class="text-muted mb-6">Upload your first medical report to get started</p>
+                <button class="btn btn-primary" onclick="document.getElementById('browseBtn').click()">
+                    <i class="fas fa-plus mr-2"></i>
+                    Upload Report
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="bottom-nav-container"></div>
+    <div id="footer-container"></div>
+</div>
+
+<!-- Report Detail Modal -->
+<div id="reportModal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeReportModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Report Details</h3>
+            <button onclick="closeReportModal()" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Report details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeReportModal()">Close</button>
+            <button class="btn btn-primary" id="downloadBtn">
+                <i class="fas fa-download mr-2"></i>
+                Download
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.max-w-4xl {
+    max-width: 56rem;
+}
+
+.upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background-color: var(--muted);
+}
+
+.upload-area.dragover {
+    border-color: var(--primary);
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.selected-file {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--muted);
+}
+
+.file-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.file-info {
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.file-size {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+}
+
+.remove-file {
+    background: none;
+    border: none;
+    color: var(--destructive);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.remove-file:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.report-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.report-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.report-preview {
+    height: 200px;
+    background: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.report-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.report-type-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.report-info {
+    padding: 1rem;
+}
+
+.report-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.report-meta {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin-bottom: 0.25rem;
+}
+
+.report-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background: var(--card);
+    border-radius: var(--radius);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    z-index: 1001;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--muted-foreground);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.modal-close:hover {
+    background: var(--muted);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+    .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .flex.flex-col.md\\:flex-row {
+        flex-direction: column;
+    }
+    
+    .modal-content {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+    }
+}
+</style>
