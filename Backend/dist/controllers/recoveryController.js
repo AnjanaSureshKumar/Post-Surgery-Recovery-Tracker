@@ -7,6 +7,7 @@ exports.createRecovery = createRecovery;
 exports.listRecoveries = listRecoveries;
 exports.getRecoveryById = getRecoveryById;
 exports.deleteRecovery = deleteRecovery;
+exports.getLatestRecovery = getLatestRecovery;
 const Recovery_1 = require("../models/Recovery");
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
@@ -95,6 +96,21 @@ async function deleteRecovery(req, res, next) {
             }
         }
         return res.json({ success: true, message: "Record deleted" });
+    }
+    catch (err) {
+        return next(err);
+    }
+}
+// 🕒 Get the latest recovery entry for the logged-in user
+async function getLatestRecovery(req, res, next) {
+    try {
+        const latest = await Recovery_1.Recovery.findOne({ userId: req.user.userId })
+            .sort({ createdAt: -1 })
+            .select("createdAt notes recoveryProgress");
+        if (!latest) {
+            return res.json({ success: true, data: null });
+        }
+        return res.json({ success: true, data: latest });
     }
     catch (err) {
         return next(err);

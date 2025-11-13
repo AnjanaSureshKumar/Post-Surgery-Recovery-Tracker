@@ -4,9 +4,9 @@ import { Recovery } from "../models/Recovery"; // ✅ Updated import
 
 // ✅ Extend Express Request inline
 declare module "express-serve-static-core" {
-  interface Request {
-    user?: { userId?: string; role?: string };
-  }
+ interface Request {
+    user?: { id?: string; userId?: string; role?: string }; // <-- Definition from another file
+}
 }
 
 // ✅ Fetch own profile (logged-in patient)

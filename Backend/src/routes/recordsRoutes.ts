@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth";
-import { listRecords, getRecordById, deleteRecord, upload, createRecord, getRecordsByPatientId,downloadRecord } from "../controllers/recordsController";
+import { listRecords, getRecordById, deleteRecord, upload, createRecord,getReportCount , getRecordsByPatientId,downloadRecord } from "../controllers/recordsController";
 import { param, validationResult } from "express-validator";
 
 const router = Router();
-
+router.get("/count", requireAuth, getReportCount);
 // 🧾 Upload new record
 router.post("/", requireAuth, upload.single("fileUpload"), createRecord);
 

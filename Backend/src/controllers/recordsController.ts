@@ -137,3 +137,14 @@ export const downloadRecord = async (req: Request, res: Response): Promise<void>
     }
   }
 };
+// 🧮 Get report count for logged-in user
+export async function getReportCount(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const count = await Record.countDocuments({ userId: req.user!.userId });
+    return res.json({ success: true, data: { totalReports: count } });
+  } catch (err) {
+    console.error("❌ Error fetching report count:", err);
+    return next(err);
+  }
+}
+

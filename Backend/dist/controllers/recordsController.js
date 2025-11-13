@@ -41,6 +41,7 @@ exports.createRecord = createRecord;
 exports.listRecords = listRecords;
 exports.getRecordById = getRecordById;
 exports.deleteRecord = deleteRecord;
+exports.getReportCount = getReportCount;
 const Record_1 = require("../models/Record");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
@@ -173,3 +174,14 @@ const downloadRecord = async (req, res) => {
     }
 };
 exports.downloadRecord = downloadRecord;
+// 🧮 Get report count for logged-in user
+async function getReportCount(req, res, next) {
+    try {
+        const count = await Record_1.Record.countDocuments({ userId: req.user.userId });
+        return res.json({ success: true, data: { totalReports: count } });
+    }
+    catch (err) {
+        console.error("❌ Error fetching report count:", err);
+        return next(err);
+    }
+}

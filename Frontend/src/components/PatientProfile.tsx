@@ -82,19 +82,28 @@ useEffect(() => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const statsData = await statsRes.json();
+
+      // 🧾 Fetch report count from Record model
+      const reportsRes = await fetch(`${API_URL}/records/count`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const reportsData = await reportsRes.json();
+
       if (statsRes.ok && statsData.success) {
-        setStats(statsData.data);
+        setStats((prev) => ({
+          ...prev,
+          ...statsData.data,
+          totalReports: reportsData?.data?.totalReports || 0,
+        }));
       }
-
-      // 🗓️ Fetch next appointment
-
     } catch (err) {
-      console.error("Error fetching profile/stats/appointment:", err);
+      console.error("Error fetching profile/stats/reports:", err);
     }
   };
 
   fetchProfileAndStats();
 }, []);
+
 
 
   // ✅ Save profile updates

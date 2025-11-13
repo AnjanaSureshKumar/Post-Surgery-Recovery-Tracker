@@ -1,39 +1,57 @@
 export const API_BASE =
-  import.meta.env.VITE_API_BASE || "http://localhost:5000";
+  import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 
 // ✅ Auth header helper
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 // ------------------ AUTH ------------------
 
 export async function apiRegister(payload: {
-  name: string;
-  email: string;
-  password: string;
+  name: string;
+  email: string;
+  password: string;
 }) {
-  const res = await fetch(`${API_BASE}/api/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw await res.json();
-  return res.json();
+  const res = await fetch(`${API_BASE}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw await res.json();
+  return res.json();
 }
 
-export async function apiLogin(payload: { email: string; password: string }) {
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw await res.json();
-  return res.json();
+// Define the new expected payload structure (This is correct)
+interface LoginPayload {
+    email: string;
+    password: string;
+    // Add the role property
+    role: "patient" | "doctor"; 
 }
 
+// 🚨 CORRECTED: The apiLogin function now uses API_BASE
+export async function apiLogin(credentials: LoginPayload): Promise<any> {
+    // 🚨 FIX: Use API_BASE for the full URL, consistent with apiRegister
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials), // credentials now includes email, password, and role
+    });
+    
+    if (!response.ok) {
+        // It's generally better to throw the error response itself or a detailed message
+        const errorData = await response.json();
+        // The backend's message, "email, password, and role are required," will now be in errorData.message
+        throw new Error(errorData.message || 'Login failed');
+    }
+    
+    return response.json();
+}
+
+// ... (Rest of the file is unchanged and omitted for brevity)
 // ------------------ RECOVERY ------------------
 
 export async function apiCreateRecovery(formData: FormData) {
@@ -333,3 +351,11 @@ export async function apiToggleNotePin(noteId: string) {
   });
   return res.json();
 }
+// ✅ Fetch the latest recovery entry (for "Last entry" on dashboard)
+export async function apiGetLatestRecovery() {
+  const headers: HeadersInit = { ...getAuthHeaders() };
+  const res = await fetch(`${API_BASE}/api/recovery/latest`, { headers });
+  if (!res.ok) throw await res.json();
+  return res.json();
+}
+

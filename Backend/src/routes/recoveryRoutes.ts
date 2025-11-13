@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { body, param, validationResult } from "express-validator";
 import { upload } from "../middlewares/upload";
-import { createRecovery, deleteRecovery, getRecoveryById, listRecoveries } from "../controllers/recoveryController";
+import { createRecovery, deleteRecovery, getRecoveryById, listRecoveries,getLatestRecovery } from "../controllers/recoveryController";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
+// ✅ Get latest recovery entry for the logged-in user
+router.get("/latest", requireAuth, getLatestRecovery);
 router.post(
 	"/",
 	requireAuth,

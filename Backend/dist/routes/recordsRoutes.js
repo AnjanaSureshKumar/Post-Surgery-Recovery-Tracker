@@ -5,6 +5,7 @@ const auth_1 = require("../middlewares/auth");
 const recordsController_1 = require("../controllers/recordsController");
 const express_validator_1 = require("express-validator");
 const router = (0, express_1.Router)();
+router.get("/count", auth_1.requireAuth, recordsController_1.getReportCount);
 // 🧾 Upload new record
 router.post("/", auth_1.requireAuth, recordsController_1.upload.single("fileUpload"), recordsController_1.createRecord);
 // 🧾 Get all records for logged-in user

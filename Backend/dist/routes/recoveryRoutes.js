@@ -6,6 +6,8 @@ const upload_1 = require("../middlewares/upload");
 const recoveryController_1 = require("../controllers/recoveryController");
 const auth_1 = require("../middlewares/auth");
 const router = (0, express_1.Router)();
+// ✅ Get latest recovery entry for the logged-in user
+router.get("/latest", auth_1.requireAuth, recoveryController_1.getLatestRecovery);
 router.post("/", auth_1.requireAuth, upload_1.upload.single("fileUpload"), (0, express_validator_1.body)("patientName").isString().trim().notEmpty(), (0, express_validator_1.body)("surgeryType").isString().trim().notEmpty(), (0, express_validator_1.body)("recoveryProgress").exists(), (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {

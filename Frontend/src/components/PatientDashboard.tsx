@@ -8,6 +8,7 @@ import { Label } from "./ui/label";
 import { AllDoctorNotesScreen } from "./AllDoctorNotesModal";
  import {
   apiListAppointments,
+  apiGetLatestRecovery,
   apiListMedications,
   apiListRecoveries,
   apiListDailyLogs,
@@ -128,12 +129,13 @@ export function PatientDashboard({
  const authToken = user.token || "";
 
   // --- Mock / Static ---
-  const mockStats = {
-    painLevel: 3,
-    temperature: 98.6,
-    mobility: 75,
-    lastUpdate: "2 hours ago",
-  };
+  const [mockStats, setMockStats] = useState({
+  painLevel: 3,
+  temperature: 98.6,
+  mobility: 75,
+  lastUpdate: "Loading...",
+});
+
 
   // --- Fetch Dashboard Data ---
  
@@ -142,7 +144,24 @@ const fetchDashboardData = useCallback(async () => {
   try {
     setIsLoading(true);
     console.log("🔄 Fetching dashboard data...");
+    const latestRes = await apiGetLatestRecovery();
+  if (latestRes?.success && latestRes?.data) {
+    const lastDate = new Date(latestRes.data.createdAt);
+    const diffMs = Date.now() - lastDate.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
+    setMockStats((prev) => ({
+      ...prev,
+      lastUpdate:
+        diffHours < 1
+          ? "less than an hour ago"
+          : diffHours === 1
+          ? "1 hour ago"
+          : `${diffHours} hours ago`,
+    }));
+  } else {
+    setMockStats((prev) => ({ ...prev, lastUpdate: "No entries yet" }));
+  }
     // 🩺 APPOINTMENTS
     const appointmentsRes = await apiListAppointments();
     console.log("Appointments API:", appointmentsRes);

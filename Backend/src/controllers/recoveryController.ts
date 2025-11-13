@@ -98,3 +98,19 @@ export async function deleteRecovery(req: AuthRequest, res: Response, next: Next
     return next(err);
   }
 }
+// 🕒 Get the latest recovery entry for the logged-in user
+export async function getLatestRecovery(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const latest = await Recovery.findOne({ userId: req.user!.userId })
+      .sort({ createdAt: -1 })
+      .select("createdAt notes recoveryProgress");
+      
+    if (!latest) {
+      return res.json({ success: true, data: null });
+    }
+
+    return res.json({ success: true, data: latest });
+  } catch (err) {
+    return next(err);
+  }
+}
